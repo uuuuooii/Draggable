@@ -1,14 +1,14 @@
 import React, {
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
+  useMemo,
 } from "react";
-import { debounce } from "underscore";
 import "./Draggable.css";
+import { debounce } from "underscore";
 
-function Draggable({ children, handleRef, onMove, x, y }) {
+function Draggable({ children, handleRef, onMove, x = 0, y = 0 }) {
   const dragRef = useRef(null);
   const initialX = useRef(0);
   const initialY = useRef(0);
@@ -22,19 +22,17 @@ function Draggable({ children, handleRef, onMove, x, y }) {
         x: event.clientX - initialX.current,
         y: event.clientY - initialY.current,
       });
-      console.log(
-        event.clientX - initialX.current,
-        event.clientY - initialY.current
-      );
       Move(event.clientX - initialX.current, event.clientY - initialY.current);
     },
     [Move]
   );
+
   const removeEvents = useCallback(() => {
     document.removeEventListener("mousemove", onMouseMove);
     document.removeEventListener("mouseup", removeEvents);
     document.body.removeEventListener("mouseleave", removeEvents);
   }, [onMouseMove]);
+
   const onMouseDown = useCallback(
     (event) => {
       const { left, top } = dragRef.current.getBoundingClientRect();
@@ -52,14 +50,15 @@ function Draggable({ children, handleRef, onMove, x, y }) {
     handle.addEventListener("mousedown", onMouseDown);
     return () => {
       handle.removeEventListener("mousedown", onMouseDown);
+      Move.cancel();
     };
-  }, [handleRef, onMouseDown]);
+  }, [handleRef, onMouseDown, Move]);
 
   return (
     <div
       ref={dragRef}
       className="draggable"
-      style={{ transform: `tranlate(${position}px, ${position}px)` }}
+      style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
     >
       {children}
     </div>
